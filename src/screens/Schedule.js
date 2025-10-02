@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../theme/theme';
 import { getSchedule, setSchedule, getWorkouts, addEntryToDay, removeEntryFromDay } from '../storage/store';
@@ -108,20 +108,30 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
 
 const makeStyles = (colors) => {
   const isDark = colors.background === '#000000';
-  const shadowSoft = {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 3,
-    shadowOpacity: isDark ? 0.25 : 0.08,
-    elevation: 2,
-  };
-  const shadowBtn = {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
-    shadowOpacity: isDark ? 0.2 : 0.06,
-    elevation: 2,
-  };
+  const shadowSoft = Platform.select({
+    web: {
+      boxShadow: isDark ? '0 1px 6px rgba(0,0,0,0.25)' : '0 1px 6px rgba(0,0,0,0.08)',
+    },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowRadius: 3,
+      shadowOpacity: isDark ? 0.25 : 0.08,
+      elevation: 2,
+    },
+  });
+  const shadowBtn = Platform.select({
+    web: {
+      boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.06)',
+    },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowRadius: 2,
+      shadowOpacity: isDark ? 0.2 : 0.06,
+      elevation: 2,
+    },
+  });
   return StyleSheet.create({
   container: {
     paddingBottom: 24,

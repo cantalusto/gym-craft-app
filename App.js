@@ -57,6 +57,7 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
   const iconAnim = useRef(new Animated.Value(1)).current;
   const contentAnim = useRef(new Animated.Value(1)).current;
   const scrollY = useRef(new Animated.Value(0)).current;
+  const nativeDriver = Platform.OS !== 'web';
   const headerOpacity = scrollY.interpolate({ inputRange: [0, 120], outputRange: [1, 0.92], extrapolate: 'clamp' });
   const headerTranslateY = scrollY.interpolate({ inputRange: [0, 120], outputRange: [0, -8], extrapolate: 'clamp' });
   const styles = StyleSheet.create({
@@ -141,14 +142,14 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
     Animated.timing(iconAnim, {
       toValue: 1,
       duration: 220,
-      useNativeDriver: true,
+      useNativeDriver: nativeDriver,
     }).start();
     // transição suave do conteúdo ao trocar de abas/detalhe
     contentAnim.setValue(0);
     Animated.timing(contentAnim, {
       toValue: 1,
       duration: 280,
-      useNativeDriver: true,
+      useNativeDriver: nativeDriver,
     }).start();
   }, [tab, selectedWorkout]);
 
@@ -174,10 +175,10 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
   const TabButton = ({ active, children, onPress }) => {
     const pressAnim = useRef(new Animated.Value(1)).current;
     const onPressIn = () => {
-      Animated.spring(pressAnim, { toValue: 0.96, useNativeDriver: true, speed: 40, bounciness: 0 }).start();
+      Animated.spring(pressAnim, { toValue: 0.96, useNativeDriver: nativeDriver, speed: 40, bounciness: 0 }).start();
     };
     const onPressOut = () => {
-      Animated.spring(pressAnim, { toValue: 1, useNativeDriver: true, speed: 40, bounciness: 8 }).start();
+      Animated.spring(pressAnim, { toValue: 1, useNativeDriver: nativeDriver, speed: 40, bounciness: 8 }).start();
     };
     return (
       <Animated.View style={{ transform: [{ scale: pressAnim }], flex: 1 }}>
@@ -196,7 +197,7 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
         scrollEventThrottle={16}
         onScroll={Animated.event([
           { nativeEvent: { contentOffset: { y: scrollY } } }
-        ], { useNativeDriver: true })}
+        ], { useNativeDriver: nativeDriver })}
       >
         <Animated.View style={{ opacity: headerOpacity, transform: [{ translateY: headerTranslateY }] }}>
           <BlurView intensity={isDark ? 18 : 12} tint={isDark ? 'dark' : 'light'} style={styles.header}>

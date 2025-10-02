@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/theme';
 import { getThemeName, setThemeName, getUnit, setUnit, getDefaultRestSeconds, setDefaultRestSeconds } from '../storage/store';
 
@@ -82,20 +82,30 @@ export default function Settings({ onThemeChanged }) {
 
 const makeStyles = (colors) => {
   const isDark = colors.background === '#000000';
-  const shadowSoft = {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 3,
-    shadowOpacity: isDark ? 0.25 : 0.08,
-    elevation: 2,
-  };
-  const shadowBtn = {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
-    shadowOpacity: isDark ? 0.2 : 0.06,
-    elevation: 2,
-  };
+  const shadowSoft = Platform.select({
+    web: {
+      boxShadow: isDark ? '0 1px 6px rgba(0,0,0,0.25)' : '0 1px 6px rgba(0,0,0,0.08)',
+    },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowRadius: 3,
+      shadowOpacity: isDark ? 0.25 : 0.08,
+      elevation: 2,
+    },
+  });
+  const shadowBtn = Platform.select({
+    web: {
+      boxShadow: isDark ? '0 1px 4px rgba(0,0,0,0.2)' : '0 1px 4px rgba(0,0,0,0.06)',
+    },
+    default: {
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 1 },
+      shadowRadius: 2,
+      shadowOpacity: isDark ? 0.2 : 0.06,
+      elevation: 2,
+    },
+  });
   return StyleSheet.create({
   container: {
     flex: 1,
