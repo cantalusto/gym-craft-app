@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { getSessionIncrements, setSessionIncrements } from '../storage/store';
 
 export default function Home() {
   const colors = useTheme();
+  const { t } = useI18n();
   const styles = makeStyles(colors);
   const [incKg, setIncKg] = useState('2.5');
   const [incLb, setIncLb] = useState('5');
@@ -25,28 +27,28 @@ export default function Home() {
   return (
     <View style={styles.container}>
       <View style={styles.hero}>
-        <Text style={styles.heroTitle}>Bem-vindo ao GymCraft</Text>
-        <Text style={styles.heroText}>Monte treinos, controle descansos e gere planos com IA.</Text>
+        <Text style={styles.heroTitle}>{t('home.welcome')}</Text>
+        <Text style={styles.heroText}>{t('home.subtitle')}</Text>
       </View>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Dica do dia</Text>
-        <Text style={styles.cardMeta}>Priorize técnica sobre carga. Ajuste o descanso conforme seu objetivo.</Text>
+        <Text style={styles.cardTitle}>{t('home.tipTitle')}</Text>
+        <Text style={styles.cardMeta}>{t('home.tipText')}</Text>
       </View>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Configurações de incremento</Text>
-        <Text style={styles.cardMeta}>Ajuste o passo dos botões +/- na sessão.</Text>
+        <Text style={styles.cardTitle}>{t('home.incTitle')}</Text>
+        <Text style={styles.cardMeta}>{t('home.incMeta')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Incremento (kg)</Text>
+            <Text style={styles.label}>{t('home.incKg')}</Text>
             <TextInput style={styles.input} keyboardType="numeric" value={incKg} onChangeText={setIncKg} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.label}>Incremento (lb)</Text>
+            <Text style={styles.label}>{t('home.incLb')}</Text>
             <TextInput style={styles.input} keyboardType="numeric" value={incLb} onChangeText={setIncLb} />
           </View>
         </View>
         <TouchableOpacity style={[styles.btn, styles.btnPrimary, { marginTop: 8 }]} onPress={saveIncrements}>
-          <Text style={styles.btnTextDark}>Salvar</Text>
+          <Text style={styles.btnTextDark}>{t('common.save')}</Text>
         </TouchableOpacity>
       </View>
     </View>

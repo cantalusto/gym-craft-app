@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform } from '
 import { BlurView } from 'expo-blur';
 import { useTheme } from '../theme/theme';
 import { getSchedule, setSchedule, getWorkouts, addEntryToDay, removeEntryFromDay } from '../storage/store';
+import { useI18n } from '../i18n';
 
 const DAYS = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado', 'Domingo'];
 
@@ -10,6 +11,7 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
   const colors = useTheme();
   const styles = makeStyles(colors);
   const isDark = (colors.background === '#121212' || colors.background === '#000000');
+  const { t } = useI18n();
   const [schedule, setLocalSchedule] = useState([]);
   const [workouts, setWorkouts] = useState([]);
   const [showAddForDay, setShowAddForDay] = useState(null);
@@ -41,8 +43,8 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Agenda semanal</Text>
-      <Text style={styles.helper}>Agrupe seus treinos por dia. Você pode adicionar rótulos simples (ex: "Perna") ou vincular um treino salvo.</Text>
+      <Text style={styles.title}>{t('schedule.title')}</Text>
+      <Text style={styles.helper}>{t('schedule.helper')}</Text>
 
       {DAYS.map((day) => {
         const dayData = schedule.find((d) => d.day === day) || { entries: [] };
@@ -51,17 +53,17 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
           .filter((x) => !!x.entry.workoutId);
         return (
           <View key={day} style={styles.dayCard}>
-            <Text style={styles.dayTitle}>{day}</Text>
+            <Text style={styles.dayTitle}>{t(`day.${day}`)}</Text>
 
             {workoutEntries.length === 0 ? (
-              <Text style={styles.empty}>Nenhum treino para este dia.</Text>
+              <Text style={styles.empty}>{t('schedule.none')}</Text>
             ) : (
               <View style={{ gap: 6 }}>
                 {workoutEntries.map(({ entry, index }) => (
                   <TouchableOpacity key={index} style={styles.entryRow} onPress={() => openEntry(entry)}>
                     <Text style={styles.entryText}>• {entry.title}</Text>
                     <TouchableOpacity style={styles.smallBtnGhost} onPress={() => removeEntry(day, index)}>
-                      <Text style={styles.smallBtnGhostText}>Remover</Text>
+                      <Text style={styles.smallBtnGhostText}>{t('schedule.remove')}</Text>
                     </TouchableOpacity>
                   </TouchableOpacity>
                 ))}
@@ -72,12 +74,12 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
               style={[styles.btn, styles.btnPrimary, { marginTop: 8 }]}
               onPress={() => setShowAddForDay((prev) => (prev === day ? null : day))}
             >
-              <Text style={styles.btnTextDark}>Adicionar treino</Text>
+              <Text style={styles.btnTextDark}>{t('schedule.addWorkout')}</Text>
             </TouchableOpacity>
 
             {showAddForDay === day && workouts.length > 0 && (
               <View style={{ marginTop: 8 }}>
-                <Text style={styles.label}>Vincular treino salvo:</Text>
+                <Text style={styles.label}>{t('schedule.linkSaved')}</Text>
                 <View style={styles.tagsRow}>
                   {workouts.map((w) => (
                     <TouchableOpacity key={w.id} style={styles.tag} onPress={() => addWorkoutEntry(day, w)}>
@@ -89,7 +91,7 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
                   style={[styles.btn, styles.btnGhost, { marginTop: 8 }]}
                   onPress={() => onCreateNewWorkout && onCreateNewWorkout()}
                 >
-                  <Text style={styles.btnTextGhost}>Criar novo treino</Text>
+                  <Text style={styles.btnTextGhost}>{t('schedule.createNew')}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -99,7 +101,7 @@ export default function Schedule({ onOpenWorkout, onCreateNewWorkout }) {
 
       <BlurView intensity={isDark ? 18 : 12} tint={isDark ? 'dark' : 'light'} style={styles.footerBlur}>
         <TouchableOpacity style={[styles.btn, styles.btnGhost]} onPress={() => setSchedule(schedule)}>
-          <Text style={styles.btnTextGhost}>Salvar agenda</Text>
+          <Text style={styles.btnTextGhost}>{t('schedule.save')}</Text>
         </TouchableOpacity>
       </BlurView>
     </ScrollView>

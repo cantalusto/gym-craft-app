@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { saveWorkout, getUnit, setUnit, getWeightSuggestions, getWeightSuggestionsByWorkout, logSessionSet, getSessionIncrements, getPRForExercise } from '../storage/store';
 
 export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, startInEditMode = false, openBannerMessage = '' }) {
   const colors = useTheme();
   const styles = makeStyles(colors);
+  const { t } = useI18n();
   const [started, setStarted] = useState(false);
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
@@ -186,9 +188,9 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
   if (!workout) {
     return (
       <ScrollView contentContainerStyle={styles.container}> 
-        <Text style={styles.title}>Nenhum treino selecionado</Text>
+        <Text style={styles.title}>{t('wd.noneSelected')}</Text>
         <TouchableOpacity style={[styles.btn, styles.btnGhost]} onPress={onClose}>
-          <Text style={styles.btnTextGhost}>Voltar</Text>
+          <Text style={styles.btnTextGhost}>{t('common.back')}</Text>
         </TouchableOpacity>
       </ScrollView>
     );
@@ -205,7 +207,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
       )}
 
       <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={() => setEditMode((v) => !v)}>
-        <Text style={styles.btnTextDark}>{editMode ? 'Sair da edição' : 'Editar treino'}</Text>
+        <Text style={styles.btnTextDark}>{editMode ? t('wd.exitEdit') : t('wd.editWorkout')}</Text>
       </TouchableOpacity>
 
       {!editMode ? (
@@ -215,7 +217,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
               <View style={{ flex: 1 }}>
                 <Text style={styles.exerciseTitle}>{e.name}</Text>
                 <Text style={styles.exerciseMeta}>
-                  {e.sets} séries • {e.reps} reps • descanso {e.rest}s
+                  {e.sets} {t('workout.series')} • {e.reps} {t('workout.reps')} • {t('workout.rest')} {e.rest}{t('workout.secondsSuffix')}
                   {Array.isArray(e.weightPerSet) && e.weightPerSet.length ? ` • ${kgToUnit(e.weightPerSet[0]).toFixed(1)}${unit}` : (typeof e.weight !== 'undefined' ? ` • ${kgToUnit(e.weight).toFixed(1)}${unit}` : '')}
                 </Text>
               </View>
@@ -231,7 +233,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                 <Text style={styles.exerciseTitle}>{e.name}</Text>
                 <View style={styles.editRow}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.editLabel}>Séries</Text>
+                    <Text style={styles.editLabel}>{t('wd.edit.series')}</Text>
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
@@ -251,7 +253,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.editLabel}>Reps</Text>
+                    <Text style={styles.editLabel}>{t('wd.edit.reps')}</Text>
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
@@ -260,7 +262,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.editLabel}>Descanso (s)</Text>
+                    <Text style={styles.editLabel}>{t('wd.edit.restSec')}</Text>
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
@@ -269,7 +271,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                     />
                   </View>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.editLabel}>Peso ({unit})</Text>
+                    <Text style={styles.editLabel}>{t('wb.weight')} ({unit})</Text>
                     <TextInput
                       style={styles.input}
                       keyboardType="numeric"
@@ -280,11 +282,11 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                 </View>
 
                 <View style={{ marginTop: 8 }}>
-                  <Text style={styles.editLabel}>Peso por série ({unit})</Text>
+                  <Text style={styles.editLabel}>{t('wd.edit.weightPerSet')} ({unit})</Text>
                   <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
                     {Array.from({ length: Number(e.sets) || 0 }).map((_, sIdx) => (
                       <View key={sIdx} style={{ width: '30%', minWidth: 100 }}>
-                        <Text style={styles.editLabel}>Série {sIdx + 1}</Text>
+                        <Text style={styles.editLabel}>{t('wd.set')} {sIdx + 1}</Text>
                         <TextInput
                           style={styles.input}
                           keyboardType="numeric"
@@ -309,7 +311,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                       return { ...x, weightPerSet: Array(totalSets).fill(base) };
                     }))}
                   >
-                    <Text style={styles.smallBtnText}>Distribuir peso</Text>
+                    <Text style={styles.smallBtnText}>{t('wd.edit.distributeWeight')}</Text>
                   </TouchableOpacity>
                   {!!suggestions.length && (
                     <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 8 }}>
@@ -330,7 +332,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
                 </View>
               </View>
               <TouchableOpacity style={styles.smallBtnGhost} onPress={() => setEditedExercises((prev) => prev.filter((_, i) => i !== idx))}>
-                <Text style={styles.smallBtnGhostText}>Remover</Text>
+                <Text style={styles.smallBtnGhostText}>{t('common.remove')}</Text>
               </TouchableOpacity>
             </View>
           ))}
@@ -344,25 +346,25 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
               if (onUpdateWorkout) onUpdateWorkout(saved);
             }}
           >
-            <Text style={styles.btnTextDark}>Salvar alterações</Text>
+            <Text style={styles.btnTextDark}>{t('wd.saveChanges')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {!started ? (
         <TouchableOpacity style={[styles.btn, styles.btnPrimary]} onPress={startWorkout} disabled={!exercises.length}>
-          <Text style={styles.btnTextDark}>{exercises.length ? 'Iniciar treino' : 'Sem exercícios'}</Text>
+          <Text style={styles.btnTextDark}>{exercises.length ? t('wd.startWorkout') : t('wd.noExercises')}</Text>
         </TouchableOpacity>
       ) : (
         <View style={styles.sessionBox}>
-      <Text style={styles.sessionTitle}>Agora: {current?.name}</Text>
-      <Text style={styles.sessionMeta}>Série {currentSet} de {current?.sets || 1}</Text>
-      <Text style={styles.sessionMeta}>Peso atual: {kgToUnit(getCurrentSetWeight()).toFixed(1)}{unit}</Text>
+      <Text style={styles.sessionTitle}>{t('wd.session.now')}: {current?.name}</Text>
+      <Text style={styles.sessionMeta}>{t('wd.set')} {currentSet} {t('common.of')} {current?.sets || 1}</Text>
+      <Text style={styles.sessionMeta}>{t('wd.session.currentWeight')}: {kgToUnit(getCurrentSetWeight()).toFixed(1)}{unit}</Text>
 
       {pr && (
         <View style={[styles.prBox, isNewPR && styles.prBoxNew]}>
-          <Text style={styles.prText}>PR atual: {kgToUnit(pr.weightKg).toFixed(1)}{unit}{pr.reps ? ` × ${pr.reps}` : ''}</Text>
-          {isNewPR && <Text style={styles.prBadge}>Novo PR!</Text>}
+          <Text style={styles.prText}>{t('wd.session.currentPR')}: {kgToUnit(pr.weightKg).toFixed(1)}{unit}{pr.reps ? ` × ${pr.reps}` : ''}</Text>
+          {isNewPR && <Text style={styles.prBadge}>{t('wd.session.newPR')}</Text>}
         </View>
       )}
 
@@ -403,7 +405,7 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
           <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
             {['1-5', '6-12', '13+'].map((r) => (
               <TouchableOpacity key={r} style={r === repRange ? styles.smallBtn : styles.smallBtnGhost} onPress={() => setRepRange(r)}>
-                <Text style={r === repRange ? styles.smallBtnText : styles.smallBtnGhostText}>{r} reps</Text>
+                <Text style={r === repRange ? styles.smallBtnText : styles.smallBtnGhostText}>{r} {t('workout.reps')}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -421,23 +423,23 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
             <View style={styles.clock}>
               <Text style={styles.time}>{format(restRemaining)}</Text>
               <TouchableOpacity style={[styles.btn, styles.btnGhost]} onPress={skipRest}>
-                <Text style={styles.btnTextGhost}>Pular descanso</Text>
+                <Text style={styles.btnTextGhost}>{t('wd.skipRest')}</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={startRest}>
-              <Text style={styles.btnTextDark}>Concluir série e descansar</Text>
+              <Text style={styles.btnTextDark}>{t('wd.finishSetAndRest')}</Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity style={[styles.btn, styles.btnGhost]} onPress={onClose}>
-            <Text style={styles.btnTextGhost}>Encerrar treino</Text>
+            <Text style={styles.btnTextGhost}>{t('wd.endWorkout')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <TouchableOpacity style={[styles.btn, styles.btnGhost, { marginTop: 8 }]} onPress={onClose}>
-        <Text style={styles.btnTextGhost}>Voltar</Text>
+        <Text style={styles.btnTextGhost}>{t('common.back')}</Text>
       </TouchableOpacity>
 
       <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
@@ -445,13 +447,13 @@ export default function WorkoutDetail({ workout, onClose, onUpdateWorkout, start
           style={[styles.smallBtn, unit === 'kg' ? styles.smallBtn : styles.smallBtnGhost]}
           onPress={async () => { const v = await setUnit('kg'); setUnitState(v); }}
         >
-          <Text style={unit === 'kg' ? styles.smallBtnText : styles.smallBtnGhostText}>kg</Text>
+          <Text style={unit === 'kg' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('common.kg')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.smallBtn, unit === 'lb' ? styles.smallBtn : styles.smallBtnGhost]}
           onPress={async () => { const v = await setUnit('lb'); setUnitState(v); }}
         >
-          <Text style={unit === 'lb' ? styles.smallBtnText : styles.smallBtnGhostText}>lb</Text>
+          <Text style={unit === 'lb' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('common.lb')}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

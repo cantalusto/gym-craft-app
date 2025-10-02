@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, FlatList, ScrollView } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { getWorkouts, saveWorkout, deleteWorkout, getUnit, setUnit } from '../storage/store';
 
 export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
   const colors = useTheme();
+  const { t } = useI18n();
   const styles = makeStyles(colors);
   const [workoutName, setWorkoutName] = useState('Treino de Perna');
   const [sets, setSets] = useState('3');
@@ -92,54 +94,54 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
       <View style={{ flex: 1 }}>
         <Text style={styles.cardTitle}>{item.name}</Text>
         <Text style={styles.cardMeta}>
-          {item.sets} séries • {item.reps} reps • {item.rest}s descanso{typeof item.weight !== 'undefined' ? ` • ${kgToUnit(item.weight).toFixed(1)}${unit}` : ''}
+          {item.sets} {t('workout.series')} • {item.reps} {t('workout.reps')} • {item.rest}{t('workout.secondsSuffix')} {t('workout.rest')}{typeof item.weight !== 'undefined' ? ` • ${kgToUnit(item.weight).toFixed(1)}${unit}` : ''}
         </Text>
       </View>
       <TouchableOpacity style={styles.removeBtn} onPress={() => removeExercise(item.id)}>
-        <Text style={styles.removeText}>Remover</Text>
+        <Text style={styles.removeText}>{t('schedule.remove')}</Text>
       </TouchableOpacity>
     </View>
   );
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.sectionTitle}>Montar treino</Text>
+      <Text style={styles.sectionTitle}>{t('wb.buildTitle')}</Text>
       <View style={{ flexDirection: 'row', gap: 8, marginBottom: 8 }}>
         <TouchableOpacity
           style={[styles.smallBtn, unit === 'kg' ? styles.smallBtn : styles.smallBtnGhost]}
           onPress={async () => { const v = await setUnit('kg'); setUnitState(v); }}
         >
-          <Text style={unit === 'kg' ? styles.smallBtnText : styles.smallBtnGhostText}>kg</Text>
+          <Text style={unit === 'kg' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('wb.unit.kg')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.smallBtn, unit === 'lb' ? styles.smallBtn : styles.smallBtnGhost]}
           onPress={async () => { const v = await setUnit('lb'); setUnitState(v); }}
         >
-          <Text style={unit === 'lb' ? styles.smallBtnText : styles.smallBtnGhostText}>lb</Text>
+          <Text style={unit === 'lb' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('wb.unit.lb')}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.row}>
-        <Text style={styles.label}>Nome do treino</Text>
+        <Text style={styles.label}>{t('wb.workoutName')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Perna, Peito e Tríceps..."
+          placeholder={t('wb.workoutName.ph')}
           value={workoutName}
           onChangeText={setWorkoutName}
         />
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.label}>Exercício</Text>
+        <Text style={styles.label}>{t('wb.exercise')}</Text>
         <TextInput
           style={styles.input}
-          placeholder="Supino reto, Agachamento..."
+          placeholder={t('wb.exercise.ph')}
           value={name}
           onChangeText={setName}
         />
       </View>
       <View style={styles.gridRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.label}>Séries</Text>
+          <Text style={styles.label}>{t('wb.series')}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -148,7 +150,7 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.label}>Reps</Text>
+          <Text style={styles.label}>{t('wb.reps')}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -157,7 +159,7 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.label}>Descanso (s)</Text>
+          <Text style={styles.label}>{t('wb.restSec')}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -166,7 +168,7 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
           />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.label}>Peso ({unit})</Text>
+          <Text style={styles.label}>{`${t('wb.weight')} (${unit})`}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -177,16 +179,16 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
       </View>
 
       <TouchableOpacity style={[styles.btn, styles.btnPrimary]} onPress={addExercise}>
-        <Text style={styles.btnTextDark}>Adicionar exercício</Text>
+        <Text style={styles.btnTextDark}>{t('wb.addExercise')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.btn, styles.btnSecondary, { marginTop: 8 }]} onPress={() => onOpenAIPlanner && onOpenAIPlanner()}>
-        <Text style={styles.btnTextDark}>Montar treinos com IA</Text>
+        <Text style={styles.btnTextDark}>{t('wb.aiBuild')}</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Seu treino</Text>
+      <Text style={[styles.sectionTitle, { marginTop: 16 }]}>{t('wb.yourWorkout')}</Text>
       {exercises.length === 0 ? (
-        <Text style={styles.empty}>Nenhum exercício adicionado ainda.</Text>
+        <Text style={styles.empty}>{t('wb.empty')}</Text>
       ) : (
         <FlatList
           data={exercises}
@@ -198,30 +200,30 @@ export default function WorkoutBuilder({ onOpenWorkout, onOpenAIPlanner }) {
 
       {exercises.length > 0 && (
         <TouchableOpacity style={[styles.btn, styles.btnSecondary, { marginTop: 12 }]} onPress={save}>
-          <Text style={styles.btnTextDark}>{editingId ? 'Atualizar treino' : 'Salvar treino (local)'}</Text>
+          <Text style={styles.btnTextDark}>{editingId ? t('wb.update') : t('wb.saveLocal')}</Text>
         </TouchableOpacity>
       )}
 
       <TouchableOpacity style={[styles.btn, styles.btnGhost, { marginTop: 8 }]} onPress={newWorkout}>
-        <Text style={styles.btnTextGhost}>{editingId ? 'Sair da edição' : 'Novo treino'}</Text>
+        <Text style={styles.btnTextGhost}>{editingId ? t('wb.exitEdit') : t('wb.newWorkout')}</Text>
       </TouchableOpacity>
 
-      <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Treinos salvos</Text>
+      <Text style={[styles.sectionTitle, { marginTop: 16 }]}>{t('wb.savedTitle')}</Text>
       {list.length === 0 ? (
-        <Text style={styles.empty}>Nenhum treino salvo ainda.</Text>
+        <Text style={styles.empty}>{t('wb.savedEmpty')}</Text>
       ) : (
         <View style={{ gap: 8 }}>
           {list.map((w) => (
             <View key={w.id} style={styles.card}>
               <TouchableOpacity style={{ flex: 1 }} onPress={() => onOpenWorkout && onOpenWorkout(w)}>
                 <Text style={styles.cardTitle}>{w.name}</Text>
-                <Text style={styles.cardMeta}>{(w.exercises || []).length} exercícios</Text>
+                <Text style={styles.cardMeta}>{(w.exercises || []).length} {t('wb.exercisesCount')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.smallBtn} onPress={() => onOpenWorkout && onOpenWorkout(w, true)}>
-                <Text style={styles.smallBtnText}>Editar</Text>
+                <Text style={styles.smallBtnText}>{t('common.edit')}</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.smallBtnGhost} onPress={() => removeWorkout(w.id)}>
-                <Text style={styles.smallBtnGhostText}>Excluir</Text>
+                <Text style={styles.smallBtnGhostText}>{t('common.delete')}</Text>
               </TouchableOpacity>
             </View>
           ))}

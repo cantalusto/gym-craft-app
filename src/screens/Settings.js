@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, Platform } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { getThemeName, setThemeName, getUnit, setUnit, getDefaultRestSeconds, setDefaultRestSeconds } from '../storage/store';
 
 export default function Settings({ onThemeChanged }) {
   const colors = useTheme();
   const styles = makeStyles(colors);
+  const { t, lang, setLang } = useI18n();
 
   const [themeName, setThemeNameState] = useState('light');
   const [unit, setUnitState] = useState('kg');
@@ -43,38 +45,57 @@ export default function Settings({ onThemeChanged }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Configurações</Text>
+      <Text style={styles.title}>{t('settings.title')}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Tema</Text>
-        <Text style={styles.cardMeta}>Ative o modo escuro para uma interface com contraste reduzido e fundo escuro.</Text>
+        <Text style={styles.cardTitle}>{t('settings.theme.title')}</Text>
+        <Text style={styles.cardMeta}>{t('settings.theme.meta')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <TouchableOpacity style={styles.btn} onPress={toggleTheme}>
-            <Text style={styles.btnTextDark}>{themeName === 'dark' ? 'Desativar modo escuro' : 'Ativar modo escuro'}</Text>
+            <Text style={styles.btnTextDark}>{themeName === 'dark' ? t('settings.theme.disable') : t('settings.theme.enable')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Unidades</Text>
-        <Text style={styles.cardMeta}>Altere entre kg e lb para pesos.</Text>
+        <Text style={styles.cardTitle}>{t('settings.units.title')}</Text>
+        <Text style={styles.cardMeta}>{t('settings.units.meta')}</Text>
         <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
           <TouchableOpacity style={unit === 'kg' ? styles.switchBtnActive : styles.switchBtn} onPress={toggleUnit}>
-            <Text style={unit === 'kg' ? styles.switchTextActive : styles.switchText}>kg</Text>
+            <Text style={unit === 'kg' ? styles.switchTextActive : styles.switchText}>{t('common.kg')}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={unit === 'lb' ? styles.switchBtnActive : styles.switchBtn} onPress={toggleUnit}>
-            <Text style={unit === 'lb' ? styles.switchTextActive : styles.switchText}>lb</Text>
+            <Text style={unit === 'lb' ? styles.switchTextActive : styles.switchText}>{t('common.lb')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Descanso padrão</Text>
-        <Text style={styles.cardMeta}>Defina os segundos de descanso padrão usados no Timer.</Text>
+        <Text style={styles.cardTitle}>{t('settings.rest.title')}</Text>
+        <Text style={styles.cardMeta}>{t('settings.rest.meta')}</Text>
         <TextInput style={styles.input} keyboardType="numeric" value={restSeconds} onChangeText={setRestSeconds} />
         <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={saveRest}>
-          <Text style={styles.btnTextDark}>Salvar descanso padrão</Text>
+          <Text style={styles.btnTextDark}>{t('settings.rest.save')}</Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>{t('settings.language.title')}</Text>
+        <Text style={styles.cardMeta}>{t('settings.language.meta')}</Text>
+        <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
+          <TouchableOpacity
+            style={lang === 'pt' ? styles.switchBtnActive : styles.switchBtn}
+            onPress={() => setLang('pt')}
+          >
+            <Text style={lang === 'pt' ? styles.switchTextActive : styles.switchText}>{t('settings.language.pt')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={lang === 'en' ? styles.switchBtnActive : styles.switchBtn}
+            onPress={() => setLang('en')}
+          >
+            <Text style={lang === 'en' ? styles.switchTextActive : styles.switchText}>{t('settings.language.en')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );

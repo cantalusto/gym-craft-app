@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { getDefaultRestSeconds, setDefaultRestSeconds } from '../storage/store';
 
 export default function Timer() {
   const colors = useTheme();
   const styles = makeStyles(colors);
+  const { t } = useI18n();
   const [mode, setMode] = useState('descanso'); // 'descanso' | 'cronometro'
   const [running, setRunning] = useState(false);
   const [restSeconds, setRestSeconds] = useState(60);
@@ -70,8 +72,8 @@ export default function Timer() {
     <View style={styles.container}>
       <View style={styles.switchRow}>
         {[
-          { key: 'descanso', label: 'Descanso' },
-          { key: 'cronometro', label: 'Cronômetro' },
+          { key: 'descanso', label: t('timer.mode.rest') },
+          { key: 'cronometro', label: t('timer.mode.stopwatch') },
         ].map((opt) => (
           <TouchableOpacity
             key={opt.key}
@@ -90,7 +92,7 @@ export default function Timer() {
 
       {mode === 'descanso' && (
         <View style={styles.inputRow}>
-          <Text style={styles.label}>Tempo de descanso (segundos)</Text>
+          <Text style={styles.label}>{t('timer.restLabel')}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
@@ -111,15 +113,15 @@ export default function Timer() {
       <View style={styles.controls}>
         {!running ? (
           <TouchableOpacity style={[styles.btn, styles.btnPrimary]} onPress={start}>
-            <Text style={styles.btnTextDark}>Iniciar</Text>
+            <Text style={styles.btnTextDark}>{t('timer.start')}</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={[styles.btn, styles.btnSecondary]} onPress={pause}>
-            <Text style={styles.btnTextDark}>Pausar</Text>
+            <Text style={styles.btnTextDark}>{t('timer.pause')}</Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[styles.btn, styles.btnGhost]} onPress={reset}>
-          <Text style={styles.btnTextGhost}>Resetar</Text>
+          <Text style={styles.btnTextGhost}>{t('timer.reset')}</Text>
         </TouchableOpacity>
       </View>
     </View>

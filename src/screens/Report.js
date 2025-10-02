@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Share, Platform } from 'react-native';
 import { useTheme } from '../theme/theme';
+import { useI18n } from '../i18n';
 import { getWeeklyReport, getWeeklyReportWithOffset, getUnit, getWeekNumber, getWeeklyReportFor, getMonthlyReport } from '../storage/store';
 
 export default function Report() {
   const colors = useTheme();
   const styles = makeStyles(colors);
+  const { t, lang } = useI18n();
   const [report, setReport] = useState({ byDay: {}, total: { sessions: 0, sets: 0, reps: 0, volumeKg: 0 }, rangeStart: '', rangeEnd: '' });
   const [unit, setUnitState] = useState('kg');
   const [weekOffset, setWeekOffset] = useState(0);
@@ -29,7 +31,8 @@ export default function Report() {
 
   const formatDate = (iso) => {
     const d = new Date(iso);
-    return d.toLocaleDateString('pt-BR');
+    const locale = lang === 'pt' ? 'pt-BR' : 'en-US';
+    return d.toLocaleDateString(locale);
   };
 
   const exportText = () => {
@@ -46,7 +49,7 @@ export default function Report() {
     const text = lines.join('\n');
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(text);
-      alert('Relatório copiado para a área de transferência');
+      alert(t('report.alert.reportCopied'));
     }
   };
 
@@ -57,7 +60,7 @@ export default function Report() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `relatorio_${formatDate(report.rangeStart)}_${formatDate(report.rangeEnd)}.json`;
+      a.download = `${t('report.fileNamePrefix')}_${formatDate(report.rangeStart)}_${formatDate(report.rangeEnd)}.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -69,7 +72,7 @@ export default function Report() {
 
   const exportCSV = () => {
     const rows = [];
-    rows.push(['Data', 'Sets', 'Reps', `Volume (${unit})`].join(','));
+    rows.push([t('report.csv.headerDate'), t('report.csv.headerSets'), t('report.csv.headerReps'), `${t('report.csv.headerVolume')} (${unit})`].join(','));
     for (const d of days) {
       rows.push([
         d,
@@ -87,7 +90,7 @@ export default function Report() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `relatorio_${formatDate(report.rangeStart)}_${formatDate(report.rangeEnd)}.csv`;
+      a.download = `${t('report.fileNamePrefix')}_${formatDate(report.rangeStart)}_${formatDate(report.rangeEnd)}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -115,7 +118,7 @@ export default function Report() {
         await Share.share({ message: text });
       } else if (navigator?.clipboard) {
         await navigator.clipboard.writeText(text);
-        alert('Resumo copiado para a área de transferência');
+        alert(t('report.alert.summaryCopied'));
       }
     } catch (e) {
       console.log(e);
@@ -124,30 +127,30 @@ export default function Report() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Relatório semanal</Text>
-      <Text style={styles.subtitle}>Período: {formatDate(report.rangeStart)} - {formatDate(report.rangeEnd)}</Text>
+      <Text style={styles.title}>{t('report.title.weekly')}</Text>
+      <Text style={styles.subtitle}>{t('report.period')}: {formatDate(report.rangeStart)} - {formatDate(report.rangeEnd)}</Text>
       {(() => { const wk = getWeekNumber(new Date(report.rangeStart)); return (
-        <Text style={styles.subtitle}>Semana ISO: {wk.week} ({wk.year})</Text>
+        <Text style={styles.subtitle}>{t('report.isoWeek')}: {wk.week} ({wk.year})</Text>
       ); })()}
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
         <TouchableOpacity style={styles.smallBtn} onPress={() => setWeekOffset((o) => o - 1)}>
-          <Text style={styles.smallBtnText}>Semana anterior</Text>
+          <Text style={styles.smallBtnText}>{t('report.prevWeek')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtnGhost} onPress={() => setWeekOffset(0)}>
-          <Text style={styles.smallBtnGhostText}>Voltar ao atual</Text>
+          <Text style={styles.smallBtnGhostText}>{t('report.backToCurrent')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtnGhost} onPress={() => setWeekOffset((o) => o + 1)}>
-          <Text style={styles.smallBtnGhostText}>Próxima semana</Text>
+          <Text style={styles.smallBtnGhostText}>{t('report.nextWeek')}</Text>
         </TouchableOpacity>
       </View>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
         <TouchableOpacity style={mode === 'week' ? styles.smallBtn : styles.smallBtnGhost} onPress={() => setMode('week')}>
-          <Text style={mode === 'week' ? styles.smallBtnText : styles.smallBtnGhostText}>Semanal</Text>
+          <Text style={mode === 'week' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('report.mode.week')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={mode === 'month' ? styles.smallBtn : styles.smallBtnGhost} onPress={() => setMode('month')}>
-          <Text style={mode === 'month' ? styles.smallBtnText : styles.smallBtnGhostText}>Mensal</Text>
+          <Text style={mode === 'month' ? styles.smallBtnText : styles.smallBtnGhostText}>{t('report.mode.month')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -164,7 +167,7 @@ export default function Report() {
               setWeekOffset(0);
             }
           }}>
-            <Text style={styles.smallBtnText}>Ir para semana</Text>
+            <Text style={styles.smallBtnText}>{t('report.jumpWeek.go')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -180,45 +183,45 @@ export default function Report() {
               setWeekOffset(0);
             }
           }}>
-            <Text style={styles.smallBtnText}>Ir para mês</Text>
+            <Text style={styles.smallBtnText}>{t('report.jumpMonth.go')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       <View style={styles.summary}>
-        <Text style={styles.summaryItem}>Sets: {report.total.sets}</Text>
-        <Text style={styles.summaryItem}>Reps: {report.total.reps}</Text>
-        <Text style={styles.summaryItem}>Volume: {kgToUnit(report.total.volumeKg).toFixed(1)}{unit}</Text>
+        <Text style={styles.summaryItem}>{t('report.summary.sets')}: {report.total.sets}</Text>
+        <Text style={styles.summaryItem}>{t('report.summary.reps')}: {report.total.reps}</Text>
+        <Text style={styles.summaryItem}>{t('report.summary.volume')}: {kgToUnit(report.total.volumeKg).toFixed(1)}{unit}</Text>
       </View>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
         <TouchableOpacity style={styles.smallBtn} onPress={exportText}>
-          <Text style={styles.smallBtnText}>Copiar resumo</Text>
+          <Text style={styles.smallBtnText}>{t('report.copy')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtnGhost} onPress={exportJson}>
-          <Text style={styles.smallBtnGhostText}>Baixar JSON</Text>
+          <Text style={styles.smallBtnGhostText}>{t('report.downloadJson')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtnGhost} onPress={exportCSV}>
-          <Text style={styles.smallBtnGhostText}>Baixar CSV</Text>
+          <Text style={styles.smallBtnGhostText}>{t('report.downloadCsv')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtnGhost} onPress={printPDF}>
-          <Text style={styles.smallBtnGhostText}>Imprimir/PDF</Text>
+          <Text style={styles.smallBtnGhostText}>{t('report.print')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.smallBtn} onPress={shareSummary}>
-          <Text style={styles.smallBtnText}>Compartilhar</Text>
+          <Text style={styles.smallBtnText}>{t('report.share')}</Text>
         </TouchableOpacity>
       </View>
 
       {days.length === 0 ? (
-        <Text style={styles.empty}>Sem sessões registradas nesta semana.</Text>
+        <Text style={styles.empty}>{t('report.empty')}</Text>
       ) : (
         days.map((d) => (
           <View key={d} style={styles.card}>
-            <Text style={styles.cardTitle}>{d}</Text>
-            <Text style={styles.cardMeta}>Sets: {report.byDay[d].sets} • Reps: {report.byDay[d].reps} • Volume: {kgToUnit(report.byDay[d].volumeKg).toFixed(1)}{unit}</Text>
+            <Text style={styles.cardTitle}>{t('day.' + d)}</Text>
+            <Text style={styles.cardMeta}>{t('report.day.sets')}: {report.byDay[d].sets} • {t('report.day.reps')}: {report.byDay[d].reps} • {t('report.day.volume')}: {kgToUnit(report.byDay[d].volumeKg).toFixed(1)}{unit}</Text>
             <View style={{ marginTop: 6 }}>
               {Object.entries(report.byDay[d].exercises).map(([name, count]) => (
-                <Text key={name} style={styles.exerciseLine}>• {name}: {count} sets</Text>
+                <Text key={name} style={styles.exerciseLine}>• {name}: {count} {t('report.exerciseLine')}</Text>
               ))}
             </View>
           </View>

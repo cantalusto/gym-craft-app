@@ -12,6 +12,7 @@ import Report from './src/screens/Report';
 import WorkoutDetail from './src/screens/WorkoutDetail';
 import Settings from './src/screens/Settings';
 import { ThemeProvider, useTheme } from './src/theme/theme';
+import { I18nProvider, useI18n } from './src/i18n';
 import { getThemeName, setThemeName } from './src/storage/store';
 
 export default function App() {
@@ -34,24 +35,27 @@ export default function App() {
   };
 
   return (
-    <ThemeProvider themeName={themeName}>
-      <AppContent
-        tab={tab}
-        setTab={setTab}
-        selectedWorkout={selectedWorkout}
-        setSelectedWorkout={setSelectedWorkout}
-        startEdit={startEdit}
-        setStartEdit={setStartEdit}
-        openBannerMessage={openBannerMessage}
-        setOpenBannerMessage={setOpenBannerMessage}
-        onThemeChanged={handleThemeChanged}
-      />
-    </ThemeProvider>
+    <I18nProvider>
+      <ThemeProvider themeName={themeName}>
+        <AppContent
+          tab={tab}
+          setTab={setTab}
+          selectedWorkout={selectedWorkout}
+          setSelectedWorkout={setSelectedWorkout}
+          startEdit={startEdit}
+          setStartEdit={setStartEdit}
+          openBannerMessage={openBannerMessage}
+          setOpenBannerMessage={setOpenBannerMessage}
+          onThemeChanged={handleThemeChanged}
+        />
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
 
 function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdit, setStartEdit, openBannerMessage, setOpenBannerMessage, onThemeChanged }) {
   const colors = useTheme();
+  const { t } = useI18n();
   const isDark = (colors.background === '#121212' || colors.background === '#000000');
   const [tabbarHeight, setTabbarHeight] = useState(0);
   const iconAnim = useRef(new Animated.Value(1)).current;
@@ -220,7 +224,7 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
               <Text style={styles.title}>GymCraft</Text>
             </View>
           </Animated.View>
-          <Text style={styles.subtitle}>Treinos modernos, simples e inteligentes</Text>
+          <Text style={styles.subtitle}>{t('app.subtitle')}</Text>
           </BlurView>
         </Animated.View>
 
@@ -255,10 +259,11 @@ function AppContent({ tab, setTab, selectedWorkout, setSelectedWorkout, startEdi
               {tab === 'IA' && (
                 <AIPlanner
                   onBackToTreino={() => setTab('Treino')}
+                  onGoToSchedule={() => setTab('Agenda')}
                   onOpenFirstSavedWorkout={(w) => {
                     setSelectedWorkout(w);
                     setStartEdit(false);
-                    setOpenBannerMessage(`Abrindo treino gerado pela IA: ${w.name}`);
+                    setOpenBannerMessage(`${t('ai.openGeneratedWorkout')}: ${w.name}`);
                     setTab('Treino');
                   }}
                 />

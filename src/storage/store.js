@@ -8,7 +8,22 @@ const KEYS = {
   sessions: 'gc_sessions',
   sessionIncrement: 'gc_session_increment',
   themeName: 'gc_theme_name',
+  languageName: 'gc_language_name',
   defaultRestSeconds: 'gc_default_rest_seconds',
+};
+
+// Normalize day keys to match i18n day keys (Portuguese base keys)
+const DAY_KEY_PT = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+// Index-based normalization helpers
+const DAY_INDEX_TO_PT = DAY_KEY_PT;
+const DAY_PT_TO_INDEX = {
+  'Domingo': 0,
+  'Segunda': 1,
+  'Terça': 2,
+  'Quarta': 3,
+  'Quinta': 4,
+  'Sexta': 5,
+  'Sábado': 6,
 };
 
 export async function getWorkouts() {
@@ -98,6 +113,48 @@ export async function removeEntryFromDay(day, index) {
   return schedule;
 }
 
+// Index-based API for Agenda (language-independent)
+export function normalizeDayKeyToIndex(day) {
+  if (typeof day === 'number') {
+    const n = Math.max(0, Math.min(6, day));
+    return n;
+  }
+  return DAY_PT_TO_INDEX[day];
+}
+
+export async function getScheduleByIndex() {
+  const byName = await getSchedule();
+  return byName.map((d) => ({ dayIndex: DAY_PT_TO_INDEX[d.day], entries: d.entries || [] }));
+}
+
+export async function setScheduleByIndex(scheduleIdx) {
+  const byName = (scheduleIdx || []).map((d) => ({ day: DAY_INDEX_TO_PT[Math.max(0, Math.min(6, d.dayIndex || 0))], entries: d.entries || [] }));
+  await setSchedule(byName);
+  return byName;
+}
+
+export async function addEntryToDayIndex(dayIndex, entry) {
+  const schedule = await getSchedule();
+  const dayName = DAY_INDEX_TO_PT[Math.max(0, Math.min(6, dayIndex))];
+  const idx = schedule.findIndex((d) => d.day === dayName);
+  if (idx >= 0) {
+    schedule[idx].entries.push(entry);
+    await setSchedule(schedule);
+  }
+  return schedule;
+}
+
+export async function removeEntryFromDayIndex(dayIndex, index) {
+  const schedule = await getSchedule();
+  const dayName = DAY_INDEX_TO_PT[Math.max(0, Math.min(6, dayIndex))];
+  const idx = schedule.findIndex((d) => d.day === dayName);
+  if (idx >= 0) {
+    schedule[idx].entries.splice(index, 1);
+    await setSchedule(schedule);
+  }
+  return schedule;
+}
+
 // Unit preference (kg/lb)
 export async function getUnit() {
   const raw = await AsyncStorage.getItem(KEYS.unit);
@@ -163,7 +220,7 @@ export async function getWeeklyReport() {
   for (const s of sessions) {
     const d = new Date(s.date);
     if (d >= start && d <= now) {
-      const dayKey = d.toLocaleDateString('pt-BR', { weekday: 'long' });
+      const dayKey = DAY_KEY_PT[d.getDay()];
       if (!byDay[dayKey]) byDay[dayKey] = { sets: 0, reps: 0, volumeKg: 0, exercises: {} };
       byDay[dayKey].sets += 1;
       byDay[dayKey].reps += Number(s.reps) || 0;
@@ -193,7 +250,7 @@ export async function getWeeklyReportWithOffset(weekOffset = 0) {
   for (const s of sessions) {
     const d = new Date(s.date);
     if (d >= start && d <= end) {
-      const dayKey = d.toLocaleDateString('pt-BR', { weekday: 'long' });
+      const dayKey = DAY_KEY_PT[d.getDay()];
       if (!byDay[dayKey]) byDay[dayKey] = { sets: 0, reps: 0, volumeKg: 0, exercises: {} };
       byDay[dayKey].sets += 1;
       byDay[dayKey].reps += Number(s.reps) || 0;
@@ -248,6 +305,18 @@ export async function getThemeName() {
 export async function setThemeName(name) {
   const val = name === 'dark' ? 'dark' : 'light';
   await AsyncStorage.setItem(KEYS.themeName, val);
+  return val;
+}
+
+// Language settings
+export async function getLanguageName() {
+  const raw = await AsyncStorage.getItem(KEYS.languageName);
+  return raw || null; // null -> not set (auto-detect)
+}
+
+export async function setLanguageName(name) {
+  const val = name === 'en' ? 'en' : 'pt';
+  await AsyncStorage.setItem(KEYS.languageName, val);
   return val;
 }
 
@@ -319,7 +388,7 @@ export async function getWeeklyReportFor(year, week) {
   for (const s of sessions) {
     const d = new Date(s.date);
     if (d >= start && d <= end) {
-      const dayKey = d.toLocaleDateString('pt-BR', { weekday: 'long' });
+      const dayKey = DAY_KEY_PT[d.getDay()];
       if (!byDay[dayKey]) byDay[dayKey] = { sets: 0, reps: 0, volumeKg: 0, exercises: {} };
       byDay[dayKey].sets += 1;
       byDay[dayKey].reps += Number(s.reps) || 0;
